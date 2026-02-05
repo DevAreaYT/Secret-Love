@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Love Cipher | DevArea</title>
+    <!-- Aesthetic Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080808;
+            --accent-color: #ff4d6d; /* Valentine Red */
+            --glass-bg: rgba(30, 30, 30, 0.6);
+            --text-main: #f0f0f0;
+            --text-dim: #999;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Courier Prime', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a0f11 0%, #080808 100%);
+        }
+
+        /* Star Background Effect */
+        #stars-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            opacity: 0.4;
+        }
+
+        .cipher-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 77, 109, 0.2);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-style: italic;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px rgba(255, 77, 109, 0.3);
+        }
+
+        .tagline {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 35px;
+        }
+
+        /* Mode Selection Tabs */
+        .tabs {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+        }
+
+        /* Message Inputs */
+        .input-box {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            font-size: 0.65rem;
+            color: var(--accent-color);
+            letter-spacing: 1.5px;
+            margin-left: 5px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 110px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+            background: rgba(0,0,0,0.5);
+        }
+
+        /* Output Result Box */
+        .result-area {
+            width: 100%;
+            min-height: 100px;
+            background: rgba(255, 77, 109, 0.05);
+            border: 1px dashed var(--accent-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            word-break: break-all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .placeholder-text {
+            font-size: 0.8rem;
+            opacity: 0.3;
+            font-style: italic;
+        }
+
+        /* Buttons Row */
+        .actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Branding Footer */
+        .footer {
+            margin-top: 40px;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        /* Notification Popup */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            background: white;
+            color: black;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.4s;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="stars-canvas"></canvas>
+
+    <div class="cipher-container">
+        <h1>Secret Cipher</h1>
+        <p class="tagline">The Language of Lovers</p>
+
+        <!-- Mode Toggle -->
+        <div class="tabs">
+            <button class="tab-btn active" id="loveMode" onclick="setMode('love')">LOVE MODE ❤️</button>
+            <button class="tab-btn" id="morseMode" onclick="setMode('morse')">MORSE MODE ⚡</button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-box">
+            <label id="inputLabel">MESSAGE LIKHO (HINDI/ENG)</label>
+            <textarea id="textInput" placeholder="Aapka secret message yahan type karein..."></textarea>
+        </div>
+
+        <!-- Result Box -->
+        <div class="input-box">
+            <label>ENCODED / DECODED RESULT</label>
+            <div class="result-area" id="resultBox">
+                <span class="placeholder-text">Yahan result dikhega...</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button class="btn btn-primary" onclick="copyToClipboard()">COPY SECRET</button>
+            <button class="btn btn-secondary" id="toggleModeBtn" onclick="toggleDecodeMode()">DECODE MODE</button>
+        </div>
+
+        <div class="footer">Idea/Concept by DevArea</div>
+    </div>
+
+    <div id="toast">Copied to Clipboard! 💌</div>
+
+    <script>
+        // Morse Code Map
+        const morseMap = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--',
+            '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+            '9': '----.', '0': '-----', ' ': '/'
+        };
+
+        const reverseMap = Object.fromEntries(Object.entries(morseMap).map(([k, v]) => [v, k]));
+
+        let currentMode = 'love'; // 'love' or 'morse'
+        let isDecoding = false;
+
+        const textInput = document.getElementById('textInput');
+        const resultBox = document.getElementById('resultBox');
+        const toggleBtn = document.getElementById('toggleModeBtn');
+        const inputLabel = document.getElementById('inputLabel');
+
+        // Stars Background Logic
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            for(let i=0; i<100; i++) {
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*1.5, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+        window.addEventListener('resize', initStars);
+        initStars();
+
+        // Core Functions
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('loveMode').classList.toggle('active', mode === 'love');
+            document.getElementById('morseMode').classList.toggle('active', mode === 'morse');
+            updateUI();
+        }
+
+        function toggleDecodeMode() {
+            isDecoding = !isDecoding;
+            toggleBtn.innerText = isDecoding ? "ENCODE MODE" : "DECODE MODE";
+            toggleBtn.style.background = isDecoding ? "#ff4d6d" : "#2a2a2a";
+            inputLabel.innerText = isDecoding ? "PASTE CODE YAHAN KAREIN" : "MESSAGE LIKHO (HINDI/ENG)";
+            textInput.placeholder = isDecoding ? "Paste secret code here to decode..." : "Aapka secret message yahan type karein...";
+            updateUI();
+        }
+
+        function encode(text) {
+            return text.toUpperCase().split('').map(char => {
+                let code = morseMap[char] || char;
+                if (currentMode === 'love') {
+                    // Dot -> Heart, Dash -> Sparkle
+                    return code.replace(/\./g, '❤️').replace(/-/g, '✨');
+                }
+                return code;
+            }).join(' ');
+        }
+
+        function decode(cipher) {
+            let processed = cipher;
+            if (cipher.includes('❤️') || cipher.includes('✨')) {
+                processed = cipher.replace(/❤️/g, '.').replace(/✨/g, '-');
+            }
+            return processed.split(' ').map(code => reverseMap[code] || code).join('').toLowerCase();
+        }
+
+        function updateUI() {
+            const val = textInput.value.trim();
+            if (!val) {
+                resultBox.innerHTML = '<span class="placeholder-text">Yahan result dikhega...</span>';
+                return;
+            }
+
+            if (isDecoding) {
+                resultBox.innerText = decode(val);
+            } else {
+                resultBox.innerText = encode(val);
+            }
+        }
+
+        textInput.addEventListener('input', updateUI);
+
+        function copyToClipboard() {
+            const text = resultBox.innerText;
+            if (text.includes('dikhega')) return;
+
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+
+            const toast = document.getElementById('toast');
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 2000);
+        }
+
+        // Auto-decode on paste
+        textInput.addEventListener('paste', () => {
+            setTimeout(() => {
+                const val = textInput.value;
+                if ((val.includes('❤️') || val.includes('✨') || val.includes('.-')) && !isDecoding) {
+                    toggleDecodeMode();
+                }
+            }, 50);
+        });
+    </script>
+</body>
+</html>
