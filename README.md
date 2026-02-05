@@ -27,7 +27,7 @@ This is a fun and creative web-based cipher tool designed for encoding and decod
 ### About DevArea
 DevArea is a YouTube channel and community dedicated to creative coding, web development, and fun tech projects. Join us for tutorials, project ideas, and more!
 
-- [YouTube: DevArea](https://www.youtube.com/@DevAreaYT)
+- [YouTube: DevArea](https://www.youtube.com/@DevArea)
 - [GitHub: DevAreaYT](https://github.com/DevAreaYT)
 
 ---
@@ -39,3 +39,4 @@ Feel free to fork, improve, and submit pull requests. For major changes, please 
 
 ## License
 This project is open source and available under the MIT License.
+
